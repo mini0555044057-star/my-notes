@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>הכספת שלי</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0f5c54">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f0f7f4;--sf:#fff;--ink:#12302c;--mut:#587670;--ln:#d2e5de;--ac:#0f5c54;--acx:#fff;--mint:#a8e6cf;--mintx:#0b3b34;--bad:#b23a2e;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0c1a18;--sf:#132622;--ink:#e3f5ee;--mut:#8fb3a8;--ln:#23423b;--ac:#7fddb8;--acx:#07201a;--mint:#7fddb8;--mintx:#07201a;--bad:#ff8f7a}}
+:root[data-theme="dark"]{--bg:#0c1a18;--sf:#132622;--ink:#e3f5ee;--mut:#8fb3a8;--ln:#23423b;--ac:#7fddb8;--acx:#07201a;--mint:#7fddb8;--mintx:#07201a;--bad:#ff8f7a}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Heebo,system-ui,Arial,sans-serif}
+.wrap{max-width:720px;margin:0 auto;padding:16px}
+h1{font-size:22px;margin:0}
+input,textarea{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--ln);border-radius:8px;padding:10px 12px}
+input:focus,textarea:focus,button:focus-visible{outline:2px solid var(--ac);outline-offset:1px}
+button{font:inherit;cursor:pointer;border:1px solid var(--ln);background:var(--sf);color:var(--ink);border-radius:8px;padding:8px 14px}
+button.p{background:var(--ac);color:var(--acx);border-color:var(--ac);font-weight:700}
+button.d{color:var(--bad)}
+button.s{padding:4px 10px;font-size:14px}
+label{display:block;font-size:14px;color:var(--mut);margin:12px 0 4px}
+.lock{max-width:380px;margin:12vh auto 0;background:var(--sf);border:1px solid var(--ln);border-radius:14px;padding:24px}
+.lock p{color:var(--mut);margin:6px 0 0}
+.err{color:var(--bad);min-height:24px;margin:8px 0 0;font-size:15px}
+.bar{display:flex;gap:8px;align-items:center;margin:12px 0;flex-wrap:wrap}
+.bar input{flex:1;min-width:160px}
+.row{background:var(--sf);border:1px solid var(--ln);border-radius:12px;padding:12px 14px;margin-bottom:10px}
+.row h3{margin:0 0 6px;font-size:17px;display:flex;justify-content:space-between;gap:8px}
+.f{display:flex;align-items:center;gap:8px;padding:4px 0;border-top:1px solid var(--ln)}
+.f:first-of-type{border-top:0}
+.f b{width:78px;flex:none;font-weight:500;color:var(--mut);font-size:14px}
+.f span{flex:1;overflow-wrap:anywhere;direction:ltr;text-align:right;font-family:ui-monospace,Consolas,monospace;font-size:15px}
+.acts{display:flex;gap:6px}
+dialog{border:1px solid var(--ln);border-radius:14px;background:var(--sf);color:var(--ink);width:min(440px,94vw);padding:20px}
+dialog::backdrop{background:rgba(0,0,0,.45)}
+.gen{display:flex;gap:8px}
+.toast{position:fixed;bottom:calc(20px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 16px;border-radius:20px;font-size:15px;opacity:0;pointer-events:none;transition:opacity .2s}
+.toast.on{opacity:1}
+.empty{text-align:center;color:var(--mut);padding:32px 0}
+.hide{display:none!important}
+select{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--ln);border-radius:8px;padding:10px 12px}
+select:focus{outline:2px solid var(--ac)}
+.wrap>.bar:first-child{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);margin:0 -16px 12px;padding:12px 16px;border-bottom:1px solid var(--ln)}
+.brand{display:flex;align-items:center;gap:10px;font-size:20px;font-weight:700}
+.logo{width:38px;height:38px;border-radius:11px;background:var(--mint);color:var(--mintx);display:grid;place-items:center}
+.logo svg{width:21px;height:21px}
+.ib{display:inline-flex;align-items:center;gap:7px;border-radius:10px;padding:9px 14px;font-size:15px;font-weight:500}
+.ib svg{width:18px;height:18px;flex:none}
+.ib:hover{background:var(--mint);color:var(--mintx);border-color:var(--mint)}
+button{transition:background .15s,border-color .15s,filter .15s}
+button:hover{border-color:var(--ac)}
+button.p{box-shadow:0 1px 2px rgba(10,50,45,.18)}
+button.p:hover{filter:brightness(1.12)}
+#q{background:var(--sf)}
+.row{border-inline-start:4px solid var(--mint);box-shadow:0 1px 3px rgba(15,60,54,.07)}
+.chip{background:var(--sf)}
+.chip.on{background:var(--mint);color:var(--mintx);border-color:var(--mint)}
+.tag{background:var(--mint);color:var(--mintx);border-color:transparent;font-weight:500}
+.lock{box-shadow:0 10px 36px rgba(15,60,54,.14)}
+.lock h1{display:flex;align-items:center;gap:10px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.chip{border-radius:20px;padding:5px 14px;font-size:15px}
+.chip.on{background:var(--ac);color:var(--acx);border-color:var(--ac);font-weight:700}
+.tag{font-size:13px;font-weight:400;color:var(--mut);border:1px solid var(--ln);border-radius:10px;padding:0 8px;margin-inline-start:6px}
+</style>
+</head>
+<body>
+<div id="lockv" class="lock hide">
+  <h1 id="lt">הכספת שלי</h1>
+  <p id="ls"></p>
+  <label for="mp">סיסמה ראשית</label>
+  <input id="mp" type="password" autocomplete="off">
+  <div id="m2w" class="hide"><label for="mp2">אימות סיסמה ראשית</label><input id="mp2" type="password" autocomplete="off"></div>
+  <div class="err" id="le" role="alert"></div>
+  <button class="p" id="lb" style="width:100%;margin-top:8px"></button>
+</div>
+
+<div id="app" class="wrap hide">
+  <div class="bar" style="justify-content:space-between"><h1 class="brand"><span class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></span>הכספת שלי</h1>
+    <div class="acts"><button class="ib" id="st"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg>הגדרות</button><button class="ib" id="lk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>נעל</button></div></div>
+  <div class="bar"><input id="q" placeholder="חיפוש לפי קטגוריה, אתר, שם משתמש או קישור"><button class="p ib" id="add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>הוספה</button></div>
+  <div class="chips" id="chips"></div>
+  <div id="list"></div>
+</div>
+
+<dialog id="ed">
+  <h1 id="edt">רשומה חדשה</h1>
+  <label for="fc">קטגוריה</label><select id="fc"></select>
+  <label for="fs">שם האתר</label><input id="fs">
+  <label for="fu">שם משתמש</label><input id="fu" autocomplete="off">
+  <label for="fp">סיסמה</label>
+  <div class="gen"><input id="fp" autocomplete="off" dir="ltr"><button id="gn" type="button">צור</button></div>
+  <label for="fl">קישור לאתר</label><input id="fl" dir="ltr" placeholder="https://">
+  <label for="fn">הערות</label><input id="fn">
+  <div class="bar" style="margin-top:16px"><button class="p" id="sv">שמור</button><button id="cx">ביטול</button></div>
+</dialog>
+
+<dialog id="bd">
+  <h1>גיבוי ושחזור</h1>
+  <p style="color:var(--mut);margin:6px 0">הגיבוי מוצפן. אפשר להדביק אותו בקובץ או בדרייב, ורק הסיסמה הראשית פותחת אותו.</p>
+  <textarea id="bt" rows="6" dir="ltr"></textarea>
+  <div class="bar" style="margin-top:12px"><button id="bc">העתק גיבוי</button><button id="bf">הורד כקובץ</button><button id="bl">טען מקובץ</button><input type="file" id="fi" class="hide" accept=".json,.txt"><button id="br" class="d">שחזר מהטקסט</button><button id="bx">סגור</button></div>
+</dialog>
+<dialog id="sd">
+  <h1>הגדרות</h1>
+  <label for="cn">הקטגוריות שלי</label>
+  <div id="cl"></div>
+  <div class="gen" style="margin-top:10px"><input id="cn" placeholder="שם קטגוריה חדשה"><button class="p" id="ca" type="button">הוסף</button></div>
+  <label for="al">נעילה אוטומטית אחרי חוסר פעילות</label>
+  <select id="al"><option value="1">דקה</option><option value="2">2 דקות</option><option value="5">5 דקות</option><option value="10">10 דקות</option><option value="30">30 דקות</option><option value="60">שעה</option></select>
+  <div class="bar" style="margin-top:16px"><button id="bk">גיבוי / שחזור</button><button id="pw">שינוי סיסמה ראשית</button><button id="sx">סגור</button></div>
+</dialog>
+<dialog id="pd">
+  <h1>שינוי סיסמה ראשית</h1>
+  <label for="po">הסיסמה הנוכחית</label><input id="po" type="password" autocomplete="off">
+  <label for="pn">סיסמה חדשה</label><input id="pn" type="password" autocomplete="off">
+  <label for="pn2">אימות סיסמה חדשה</label><input id="pn2" type="password" autocomplete="off">
+  <div class="err" id="pe" role="alert"></div>
+  <div class="bar"><button class="p" id="ps">שנה סיסמה</button><button id="pc">ביטול</button></div>
+</dialog>
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+var $=function(i){return document.getElementById(i)};
+var enc=new TextEncoder(),dec=new TextDecoder();
+var mem={};
+function st(k,v){try{if(v===undefined){var r=localStorage.getItem(k);return r===null?mem[k]||null:r}localStorage.setItem(k,v)}catch(e){if(v===undefined)return mem[k]||null;mem[k]=v}}
+function b64(buf){var a=new Uint8Array(buf),s='';for(var i=0;i<a.length;i++)s+=String.fromCharCode(a[i]);return btoa(s)}
+function unb64(s){var b=atob(s),a=new Uint8Array(b.length);for(var i=0;i<b.length;i++)a[i]=b.charCodeAt(i);return a}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function toast(t){var e=$('toast');e.textContent=t;e.classList.add('on');setTimeout(function(){e.classList.remove('on')},1600)}
+
+var MAX=3,BLOCK_MIN=30;
+var key=null,salt=null,items=[],cats=[],curCat='',lastCat='',editId=null,timer=null,shown={};
+
+async function derive(pw,s){var k=await crypto.subtle.importKey('raw',enc.encode(pw),'PBKDF2',false,['deriveKey']);
+ return crypto.subtle.deriveKey({name:'PBKDF2',salt:s,iterations:600000,hash:'SHA-256'},k,{name:'AES-GCM',length:256},false,['encrypt','decrypt'])}
+async function pack(){var iv=crypto.getRandomValues(new Uint8Array(12));
+ var ct=await crypto.subtle.encrypt({name:'AES-GCM',iv:iv},key,enc.encode(JSON.stringify({c:cats,i:items})));
+ return JSON.stringify({v:1,salt:b64(salt),iv:b64(iv),data:b64(ct)})}
+async function save(){st('vault',await pack())}
+async function open(pw,text){var o=JSON.parse(text),s=unb64(o.salt),k=await derive(pw,s);
+ var pt=await crypto.subtle.decrypt({name:'AES-GCM',iv:unb64(o.iv)},k,unb64(o.data));
+ var d=JSON.parse(dec.decode(pt));if(Array.isArray(d))d={c:[],i:d};return{key:k,salt:s,items:d.i||[],cats:d.c||[]}}
+
+function lockInfo(){try{return JSON.parse(st('lock')||'{"f":0,"u":0}')}catch(e){return{f:0,u:0}}}
+var tick=null;
+function showLock(){
+ $('app').classList.add('hide');$('lockv').classList.remove('hide');
+ var has=!!st('vault');$('m2w').classList.toggle('hide',has);
+ $('ls').textContent=has?'הקלד את הסיסמה כדי לפתוח.':'זו הפעם הראשונה. בחר סיסמה ראשית ארוכה, למשל 4 או 5 מילים אקראיות. אם תשכח אותה אי אפשר לשחזר.';
+ $('lb').textContent=has?'פתח':'צור כספת';$('mp').value='';$('mp2').value='';$('le').textContent='';
+ clearInterval(tick);tick=setInterval(blockUi,1000);blockUi()}
+function blockUi(){var l=lockInfo(),left=l.u-Date.now(),b=$('lb');
+ if(left>0){var m=Math.floor(left/60000),s=Math.floor(left%60000/1000);
+  $('le').textContent='יותר מדי ניסיונות. אפשר לנסות שוב בעוד '+m+':'+(s<10?'0':'')+s;b.disabled=true;$('mp').disabled=true}
+ else{if(b.disabled&&l.u){$('le').textContent=''}b.disabled=false;$('mp').disabled=false}}
+
+async function go(){
+ var l=lockInfo();if(l.u>Date.now())return;
+ var pw=$('mp').value,has=!!st('vault');
+ if(pw.length<1){$('le').textContent='הקלד סיסמה';return}
+ $('lb').disabled=true;
+ try{
+  if(!has){
+   if(pw.length<8){$('le').textContent='הסיסמה הראשית קצרה מדי (לפחות 8 תווים)';$('lb').disabled=false;return}
+   if(pw!==$('mp2').value){$('le').textContent='שתי הסיסמאות לא זהות';$('lb').disabled=false;return}
+   salt=crypto.getRandomValues(new Uint8Array(16));key=await derive(pw,salt);items=[];cats=['כללי','עסק','חברים'];await save();
+  }else{
+   try{var r=await open(pw,st('vault'));key=r.key;salt=r.salt;items=r.items;cats=r.cats}
+   catch(e){var f=l.f+1,u=0,msg;
+    if(f>=MAX){u=Date.now()+BLOCK_MIN*60000;f=0;msg='הסיסמה שגויה. הכספת נחסמה ל-'+BLOCK_MIN+' דקות.'}
+    else msg='הסיסמה שגויה. נשארו '+(MAX-f)+' ניסיונות.';
+    st('lock',JSON.stringify({f:f,u:u}));$('le').textContent=msg;$('mp').value='';$('lb').disabled=false;blockUi();return}
+  }
+  st('lock',JSON.stringify({f:0,u:0}));clearInterval(tick);
+  $('lockv').classList.add('hide');$('app').classList.remove('hide');render();arm();
+ }catch(e){$('le').textContent='שגיאה: '+e.message}
+ $('lb').disabled=false}
+
+function lockNow(){key=null;items=[];cats=[];curCat='';shown={};$('q').value='';$('list').innerHTML='';clearTimeout(timer);showLock()}
+function lockMs(){var m=parseInt(st('autolock'),10);return(m>0?m:10)*60000}
+function arm(){clearTimeout(timer);timer=setTimeout(function(){if(key)lockNow()},lockMs())}
+['click','keydown','touchstart'].forEach(function(ev){document.addEventListener(ev,function(){if(key)arm()},{passive:true})});
+
+function copy(t){var done=function(){toast('הועתק')};
+ try{navigator.clipboard.writeText(t).then(done,fb)}catch(e){fb()}
+ function fb(){var a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();try{document.execCommand('copy');done()}catch(e){toast('ההעתקה נכשלה')}a.remove()}}
+
+function renderChips(){
+ var h='<button class="chip'+(!curCat?' on':'')+'" data-c="">הכל ('+items.length+')</button>';
+ cats.forEach(function(c){var n=items.filter(function(x){return x.c===c}).length;
+  h+='<button class="chip'+(curCat===c?' on':'')+'" data-c="'+esc(c)+'">'+esc(c)+' ('+n+')</button>'});
+ $('chips').innerHTML=h}
+$('chips').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;curCat=b.getAttribute('data-c');render()});
+function render(){
+ renderChips();var q=$('q').value.trim().toLowerCase(),L=$('list'),h='',n=0;
+ items.forEach(function(it){
+  if(q){if((it.c+' '+it.s+' '+it.u+' '+it.l+' '+it.n).toLowerCase().indexOf(q)<0)return}else if(curCat&&it.c!==curCat)return;n++;
+  var pv=shown[it.id]?esc(it.p):'••••••••••';
+  h+='<div class="row" data-id="'+it.id+'"><h3><span>'+esc(it.s)+(it.c?' <span class="tag">'+esc(it.c)+'</span>':'')+'</span><span class="acts"><button class="s" data-a="edit">עריכה</button><button class="s d" data-a="del">מחיקה</button></span></h3>'
+  +'<div class="f"><b>שם משתמש</b><span>'+esc(it.u)+'</span><button class="s" data-a="cu">העתק</button></div>'
+  +'<div class="f"><b>סיסמה</b><span>'+pv+'</span><button class="s" data-a="sh">'+(shown[it.id]?'הסתר':'הצג')+'</button><button class="s" data-a="cp">העתק</button></div>'
+  +(it.l?'<div class="f"><b>קישור</b><span>'+esc(it.l)+'</span><button class="s" data-a="op">פתח</button><button class="s" data-a="cl">העתק</button></div>':'')
+  +(it.n?'<div class="f"><b>הערות</b><span style="direction:rtl;font-family:inherit">'+esc(it.n)+'</span></div>':'')
+  +'</div>'});
+ L.innerHTML=n?h:'<div class="empty">'+(items.length?'לא נמצאו תוצאות':'הכספת ריקה. לחץ על הוספה כדי להתחיל.')+'</div>'}
+
+$('list').addEventListener('click',async function(e){
+ var b=e.target.closest('button');if(!b)return;var row=b.closest('.row'),id=row.getAttribute('data-id'),
+ it=items.filter(function(x){return x.id===id})[0],a=b.getAttribute('data-a');
+ if(a==='cu')copy(it.u);else if(a==='cp')copy(it.p);else if(a==='cl')copy(it.l);
+ else if(a==='sh'){shown[id]=!shown[id];render()}
+ else if(a==='op'){var u=/^https?:\/\//i.test(it.l)?it.l:'https://'+it.l;window.open(u,'_blank','noopener')}
+ else if(a==='edit')openEd(it);
+ else if(a==='del'&&confirm('למחוק את הרשומה '+it.s+'?')){items=items.filter(function(x){return x.id!==id});await save();render();toast('נמחק')}});
+$('q').addEventListener('input',render);
+
+function openEd(it){editId=it?it.id:null;$('edt').textContent=it?'עריכת רשומה':'רשומה חדשה';
+ fillSel(it?it.c:(curCat||lastCat));$('fs').value=it?it.s:'';$('fu').value=it?it.u:'';$('fp').value=it?it.p:'';$('fl').value=it?it.l:'';$('fn').value=it?it.n:'';$('ed').showModal()}
+function fillSel(v){var h='<option value="">ללא קטגוריה</option>';cats.forEach(function(c){h+='<option value="'+esc(c)+'">'+esc(c)+'</option>'});$('fc').innerHTML=h;$('fc').value=cats.indexOf(v)>=0?v:''}
+$('add').onclick=function(){openEd(null)};
+function renderSet(){var h='';cats.forEach(function(c,i){h+='<div class="f"><span style="direction:rtl;font-family:inherit">'+esc(c)+'</span><button class="s" data-a="rn" data-i="'+i+'">שינוי שם</button><button class="s d" data-a="dc" data-i="'+i+'">מחיקה</button></div>'});$('cl').innerHTML=h||'<div class="empty">אין קטגוריות</div>'}
+$('st').onclick=function(){renderSet();$('al').value=String(Math.round(lockMs()/60000));$('sd').showModal()};
+$('al').onchange=function(){st('autolock',this.value);arm()};
+$('sx').onclick=function(){$('sd').close()};
+$('pw').onclick=function(){$('sd').close();['po','pn','pn2'].forEach(function(i){$(i).value=''});$('pe').textContent='';$('pd').showModal()};
+$('pc').onclick=function(){$('pd').close()};
+$('ps').onclick=async function(){
+ var o=$('po').value,n=$('pn').value,n2=$('pn2').value,e=$('pe');
+ if(n.length<8){e.textContent='הסיסמה החדשה קצרה מדי (לפחות 8 תווים)';return}
+ if(n!==n2){e.textContent='שתי הסיסמאות החדשות לא זהות';return}
+ if(n===o){e.textContent='הסיסמה החדשה זהה לנוכחית';return}
+ $('ps').disabled=true;e.textContent='בודק...';
+ try{await open(o,st('vault'))}catch(x){e.textContent='הסיסמה הנוכחית שגויה';$('ps').disabled=false;return}
+ try{salt=crypto.getRandomValues(new Uint8Array(16));key=await derive(n,salt);await save();$('pd').close();toast('הסיסמה שונתה')}catch(x){e.textContent='שגיאה: '+x.message}
+ $('ps').disabled=false};
+$('ca').onclick=async function(){var nm=$('cn').value.trim();if(!nm)return;if(cats.indexOf(nm)>=0){toast('הקטגוריה כבר קיימת');return}cats.push(nm);await save();$('cn').value='';renderSet();render()};
+$('cn').addEventListener('keydown',function(e){if(e.key==='Enter')$('ca').onclick()});
+$('cl').addEventListener('click',async function(e){var b=e.target.closest('button');if(!b)return;var i=+b.getAttribute('data-i'),old=cats[i],a=b.getAttribute('data-a');
+ if(a==='rn'){var nn=prompt('שם חדש לקטגוריה',old);if(nn===null)return;nn=nn.trim();if(!nn||nn===old)return;if(cats.indexOf(nn)>=0){toast('השם כבר קיים');return}
+  items.forEach(function(x){if(x.c===old)x.c=nn});if(curCat===old)curCat=nn;if(lastCat===old)lastCat=nn;cats[i]=nn}
+ else if(a==='dc'){if(!confirm('למחוק את הקטגוריה '+old+'? הרשומות שלה יישארו בלי קטגוריה.'))return;
+  items.forEach(function(x){if(x.c===old)x.c=''});cats.splice(i,1);if(curCat===old)curCat='';if(lastCat===old)lastCat=''}
+ await save();renderSet();render()});
+$('cx').onclick=function(){$('ed').close()};
+$('gn').onclick=function(){var cs='abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789!@#$%^&*',a=crypto.getRandomValues(new Uint32Array(18)),s='';
+ for(var i=0;i<a.length;i++)s+=cs[a[i]%cs.length];$('fp').value=s};
+$('sv').onclick=async function(){
+ var o={c:$('fc').value,s:$('fs').value.trim(),u:$('fu').value,p:$('fp').value,l:$('fl').value.trim(),n:$('fn').value.trim()};
+ if(!o.s){toast('חסר שם אתר');return}
+ if(editId){items.forEach(function(x){if(x.id===editId){x.c=o.c;x.s=o.s;x.u=o.u;x.p=o.p;x.l=o.l;x.n=o.n}})}
+ else{o.id=String(Date.now())+Math.floor(Math.random()*1000);items.push(o)}
+ items.sort(function(a,b){return a.s.localeCompare(b.s,'he')});
+ lastCat=o.c;await save();$('ed').close();render();toast('נשמר')};
+
+$('lk').onclick=lockNow;
+$('lb').onclick=go;
+$('mp').addEventListener('keydown',function(e){if(e.key==='Enter'){if(st('vault'))go();else $('mp2').focus()}});
+$('mp2').addEventListener('keydown',function(e){if(e.key==='Enter')go()});
+
+$('bk').onclick=async function(){$('sd').close();$('bt').value=await pack();$('bd').showModal()};
+$('bx').onclick=function(){$('bd').close()};
+$('bf').onclick=function(){var u=URL.createObjectURL(new Blob([$('bt').value],{type:'application/json'})),a=document.createElement('a');a.href=u;a.download='vault-backup.json';document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(u)},1000)};
+$('bl').onclick=function(){$('fi').click()};
+$('fi').onchange=function(){var f=this.files[0];if(!f)return;var r=new FileReader();r.onload=function(){$('bt').value=r.result;toast('נטען. לחץ שחזר מהטקסט')};r.readAsText(f)};
+$('bc').onclick=function(){copy($('bt').value)};
+$('br').onclick=async function(){
+ var t=$('bt').value.trim(),pw=prompt('הקלד את הסיסמה הראשית של הגיבוי');if(!t||pw===null)return;
+ try{var r=await open(pw,t);key=r.key;salt=r.salt;items=r.items;cats=r.cats;curCat='';await save();render();$('bd').close();toast('שוחזר')}
+ catch(e){toast('הסיסמה שגויה או שהגיבוי פגום')}};
+
+showLock();
+try{if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(function(){})}catch(e){}
+})();
+</script>
+</body>
+</html>
