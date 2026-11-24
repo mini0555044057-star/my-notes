@@ -109,6 +109,8 @@ button.p:hover{filter:brightness(1.12)}
   <label for="cn">הקטגוריות שלי</label>
   <div id="cl"></div>
   <div class="gen" style="margin-top:10px"><input id="cn" placeholder="שם קטגוריה חדשה"><button class="p" id="ca" type="button">הוסף</button></div>
+  <label for="al">נעילה אוטומטית אחרי חוסר פעילות</label>
+  <select id="al"><option value="1">דקה</option><option value="2">2 דקות</option><option value="5">5 דקות</option><option value="10">10 דקות</option><option value="30">30 דקות</option><option value="60">שעה</option></select>
   <div class="bar" style="margin-top:16px"><button id="bk">גיבוי / שחזור</button><button id="pw">שינוי סיסמה ראשית</button><button id="sx">סגור</button></div>
 </dialog>
 <dialog id="pd">
@@ -133,7 +135,7 @@ function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){retur
 function toast(t){var e=$('toast');e.textContent=t;e.classList.add('on');setTimeout(function(){e.classList.remove('on')},1600)}
 
 var MAX=3,BLOCK_MIN=30;
-var key=null,salt=null,items=[],cats=[],curCat='',lastCat='',editId=null,timer=null,shown={};
+var key=null,salt=null,items=[],cats=[],curCat='',lastCat='',editId=null,timer=null,lockDeadline=0,shown={};
 
 async function derive(pw,s){var k=await crypto.subtle.importKey('raw',enc.encode(pw),'PBKDF2',false,['deriveKey']);
  return crypto.subtle.deriveKey({name:'PBKDF2',salt:s,iterations:600000,hash:'SHA-256'},k,{name:'AES-GCM',length:256},false,['encrypt','decrypt'])}
@@ -176,13 +178,43 @@ async function go(){
     st('lock',JSON.stringify({f:f,u:u}));$('le').textContent=msg;$('mp').value='';$('lb').disabled=false;blockUi();return}
   }
   st('lock',JSON.stringify({f:0,u:0}));clearInterval(tick);
+  $('mp').value='';$('mp2').value='';
   $('lockv').classList.add('hide');$('app').classList.remove('hide');render();arm();
  }catch(e){$('le').textContent='שגיאה: '+e.message}
  $('lb').disabled=false}
 
-function lockNow(){key=null;items=[];cats=[];curCat='';shown={};$('q').value='';$('list').innerHTML='';clearTimeout(timer);showLock()}
-function arm(){clearTimeout(timer);timer=setTimeout(function(){if(key)lockNow()},120000)}
-['click','keydown','touchstart'].forEach(function(ev){document.addEventListener(ev,function(){if(key)arm()},{passive:true})});
+function lockNow(){
+ key=null;salt=null;items=[];cats=[];curCat='';lastCat='';editId=null;shown={};lockDeadline=0;
+ clearTimeout(timer);
+ ['ed','bd','sd','pd'].forEach(function(id){if($(id).open)$(id).close()});
+ ['q','fs','fu','fp','fl','fn','bt','fi','cn','po','pn','pn2'].forEach(function(id){$(id).value=''});
+ ['list','chips','cl','fc'].forEach(function(id){$(id).textContent=''});
+ showLock()
+}
+function lockMinutes(){
+ var value=Number(st('autolock'));
+ return [1,2,5,10,30,60].indexOf(value)>=0?value:10
+}
+function checkLock(){
+ if(!key||!lockDeadline)return false;
+ clearTimeout(timer);
+ var remaining=lockDeadline-Date.now();
+ if(remaining<=0){lockNow();return true}
+ timer=setTimeout(checkLock,remaining);
+ return false
+}
+function arm(){lockDeadline=Date.now()+lockMinutes()*60000;checkLock()}
+function onActivity(event){
+ if(!key||document.hidden)return;
+ if(lockDeadline&&Date.now()>=lockDeadline){
+  lockNow();event.stopImmediatePropagation();return
+ }
+ arm()
+}
+['click','keydown','touchstart'].forEach(function(ev){document.addEventListener(ev,onActivity,true)});
+document.addEventListener('visibilitychange',checkLock);
+window.addEventListener('focus',checkLock);
+window.addEventListener('pageshow',checkLock);
 
 function copy(t){var done=function(){toast('הועתק')};
  try{navigator.clipboard.writeText(t).then(done,fb)}catch(e){fb()}
@@ -222,18 +254,23 @@ function openEd(it){editId=it?it.id:null;$('edt').textContent=it?'עריכת ר�
 function fillSel(v){var h='<option value="">ללא קטגוריה</option>';cats.forEach(function(c){h+='<option value="'+esc(c)+'">'+esc(c)+'</option>'});$('fc').innerHTML=h;$('fc').value=cats.indexOf(v)>=0?v:''}
 $('add').onclick=function(){openEd(null)};
 function renderSet(){var h='';cats.forEach(function(c,i){h+='<div class="f"><span style="direction:rtl;font-family:inherit">'+esc(c)+'</span><button class="s" data-a="rn" data-i="'+i+'">שינוי שם</button><button class="s d" data-a="dc" data-i="'+i+'">מחיקה</button></div>'});$('cl').innerHTML=h||'<div class="empty">אין קטגוריות</div>'}
-$('st').onclick=function(){renderSet();$('sd').showModal()};
+$('st').onclick=function(){renderSet();$('al').value=String(lockMinutes());$('sd').showModal()};
+$('al').onchange=function(){if(key){st('autolock',this.value);arm()}};
 $('sx').onclick=function(){$('sd').close()};
 $('pw').onclick=function(){$('sd').close();['po','pn','pn2'].forEach(function(i){$(i).value=''});$('pe').textContent='';$('pd').showModal()};
 $('pc').onclick=function(){$('pd').close()};
 $('ps').onclick=async function(){
- var o=$('po').value,n=$('pn').value,n2=$('pn2').value,e=$('pe');
+ var sessionKey=key,o=$('po').value,n=$('pn').value,n2=$('pn2').value,e=$('pe');
  if(n.length<8){e.textContent='הסיסמה החדשה קצרה מדי (לפחות 8 תווים)';return}
  if(n!==n2){e.textContent='שתי הסיסמאות החדשות לא זהות';return}
  if(n===o){e.textContent='הסיסמה החדשה זהה לנוכחית';return}
  $('ps').disabled=true;e.textContent='בודק...';
  try{await open(o,st('vault'))}catch(x){e.textContent='הסיסמה הנוכחית שגויה';$('ps').disabled=false;return}
- try{salt=crypto.getRandomValues(new Uint8Array(16));key=await derive(n,salt);await save();$('pd').close();toast('הסיסמה שונתה')}catch(x){e.textContent='שגיאה: '+x.message}
+ try{
+  var nextSalt=crypto.getRandomValues(new Uint8Array(16)),nextKey=await derive(n,nextSalt);
+  if(checkLock()||key!==sessionKey){$('ps').disabled=false;return}
+  salt=nextSalt;key=nextKey;await save();$('pd').close();toast('הסיסמה שונתה')
+ }catch(x){e.textContent='שגיאה: '+x.message}
  $('ps').disabled=false};
 $('ca').onclick=async function(){var nm=$('cn').value.trim();if(!nm)return;if(cats.indexOf(nm)>=0){toast('הקטגוריה כבר קיימת');return}cats.push(nm);await save();$('cn').value='';renderSet();render()};
 $('cn').addEventListener('keydown',function(e){if(e.key==='Enter')$('ca').onclick()});
@@ -259,15 +296,18 @@ $('lb').onclick=go;
 $('mp').addEventListener('keydown',function(e){if(e.key==='Enter'){if(st('vault'))go();else $('mp2').focus()}});
 $('mp2').addEventListener('keydown',function(e){if(e.key==='Enter')go()});
 
-$('bk').onclick=async function(){$('sd').close();$('bt').value=await pack();$('bd').showModal()};
+$('bk').onclick=async function(){
+ var sessionKey=key;$('sd').close();var backup=await pack();
+ if(!checkLock()&&key===sessionKey){$('bt').value=backup;$('bd').showModal()}
+};
 $('bx').onclick=function(){$('bd').close()};
 $('bf').onclick=function(){var u=URL.createObjectURL(new Blob([$('bt').value],{type:'application/json'})),a=document.createElement('a');a.href=u;a.download='vault-backup.json';document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(u)},1000)};
 $('bl').onclick=function(){$('fi').click()};
 $('fi').onchange=function(){var f=this.files[0];if(!f)return;var r=new FileReader();r.onload=function(){$('bt').value=r.result;toast('נטען. לחץ שחזר מהטקסט')};r.readAsText(f)};
 $('bc').onclick=function(){copy($('bt').value)};
 $('br').onclick=async function(){
- var t=$('bt').value.trim(),pw=prompt('הקלד את הסיסמה הראשית של הגיבוי');if(!t||pw===null)return;
- try{var r=await open(pw,t);key=r.key;salt=r.salt;items=r.items;cats=r.cats;curCat='';await save();render();$('bd').close();toast('שוחזר')}
+ var sessionKey=key,t=$('bt').value.trim(),pw=prompt('הקלד את הסיסמה הראשית של הגיבוי');if(!t||pw===null)return;
+ try{var r=await open(pw,t);if(checkLock()||key!==sessionKey)return;key=r.key;salt=r.salt;items=r.items;cats=r.cats;curCat='';await save();render();$('bd').close();toast('שוחזר')}
  catch(e){toast('הסיסמה שגויה או שהגיבוי פגום')}};
 
 showLock();
